@@ -172,18 +172,59 @@
         const form = document.getElementById('presensiForm');
         const submitBtn = document.getElementById('submitBtn');
 
+        // --- PENGATURAN WAKTU PRESENSI ---
+        // Format ISO 8601 (Tahun-Bulan-Tanggal T Jam:Menit:Detik +Zona Waktu)
+        // +07:00 adalah zona waktu WIB (Waktu Indonesia Barat)
+        const waktuBuka = new Date('2026-08-13T14:00:00+07:00').getTime();
+        const waktuTutup = new Date('2026-08-13T18:00:00+07:00').getTime();
+
+        function periksaWaktu() {
+            const waktuSekarang = new Date().getTime();
+            
+            if (waktuSekarang < waktuBuka) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '🔒 Presensi Belum Dibuka (Buka 14.00 WIB)';
+                submitBtn.className = 'w-full bg-gray-400 text-white font-bold py-3 px-4 rounded-xl cursor-not-allowed flex justify-center items-center gap-2';
+                return false;
+            } else if (waktuSekarang > waktuTutup) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '🔒 Presensi Sudah Ditutup (Tutup 18.00 WIB)';
+                submitBtn.className = 'w-full bg-red-500 text-white font-bold py-3 px-4 rounded-xl cursor-not-allowed flex justify-center items-center gap-2';
+                return false;
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Kirim Presensi & Refleksi';
+                submitBtn.className = 'w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 flex justify-center items-center gap-2';
+                return true;
+            }
+        }
+
+        // Jalankan pengecekan saat halaman pertama dibuka, lalu ulangi setiap 1 detik
+        periksaWaktu();
+        setInterval(periksaWaktu, 1000);
+
+        // --- LOGIKA PENGIRIMAN DATA ---
         form.addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Verifikasi ganda sebelum mengirim
+            if (!periksaWaktu()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Waktu Tidak Valid',
+                    text: 'Presensi hanya dapat diisi pada 13 Agustus 2026 pukul 14.00 - 18.00 WIB.',
+                    confirmButtonColor: '#2563EB'
+                });
+                return;
+            }
             
             // Ubah tombol menjadi loading state
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Mengirim Data...';
 
-            // Mengambil semua data dari form
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
 
-            // Mengirim data ke Google Apps Script
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify(data),
@@ -194,10 +235,10 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'Berhasil!',
-                        text: 'Presensi dan Refleksi Anda telah tercatat. Sertifikat akan dikirimkan ke email Anda.',
+                        text: 'Presensi dan Refleksi Anda telah tercatat. Sertifikat akan dikirimkan ke email Anda sesuai jadwal.',
                         confirmButtonColor: '#2563EB'
                     });
-                    form.reset(); // Mengosongkan form
+                    form.reset();
                 } else {
                     throw new Error(result.message);
                 }
@@ -206,14 +247,13 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
-                    text: 'Terjadi kesalahan. Silakan coba lagi. (' + error.message + ')',
+                    text: 'Terjadi kesalahan. (' + error.message + ')',
                     confirmButtonColor: '#DC2626'
                 });
             })
             .finally(() => {
-                // Kembalikan tombol seperti semula
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Kirim Presensi & Refleksi';
+                // Kembalikan status tombol ke fungsi periksa waktu
+                periksaWaktu();
             });
         });
     </script>
