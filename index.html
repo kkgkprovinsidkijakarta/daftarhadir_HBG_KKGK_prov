@@ -176,7 +176,7 @@
         // Format ISO 8601 (Tahun-Bulan-Tanggal T Jam:Menit:Detik +Zona Waktu)
         // +07:00 adalah zona waktu WIB (Waktu Indonesia Barat)
         const waktuBuka = new Date('2026-08-13T14:00:00+07:00').getTime();
-        const waktuTutup = new Date('2026-08-13T18:00:00+07:00').getTime();
+        const waktuTutup = new Date('2026-08-15T23:59:00+07:00').getTime();
 
         function periksaWaktu() {
             const waktuSekarang = new Date().getTime();
@@ -188,7 +188,7 @@
                 return false;
             } else if (waktuSekarang > waktuTutup) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '🔒 Presensi Sudah Ditutup (Tutup 18.00 WIB)';
+                submitBtn.innerHTML = '🔒 Presensi Sudah Ditutup (Tutup 15 Agustus 2026 Pukul 23.59 WIB)';
                 submitBtn.className = 'w-full bg-red-500 text-white font-bold py-3 px-4 rounded-xl cursor-not-allowed flex justify-center items-center gap-2';
                 return false;
             } else {
