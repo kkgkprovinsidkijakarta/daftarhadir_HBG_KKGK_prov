@@ -132,48 +132,47 @@
 
 
                     <!-- TOMBOL WHATSAPP -->
-                    <a
-                        id="whatsappBtn"
-                        href="https://chat.whatsapp.com/GbLwn3xEA2z11zKhB6btmA?s=cl&p=a&mlu=4"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 flex justify-center items-center gap-2">
+<a
+    id="whatsappBtn"
+    href="https://chat.whatsapp.com/GbLwn3xEA2z11zKhB6btmA?s=cl&p=a&mlu=4"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 flex justify-center items-center gap-2">
 
-                        <span class="text-xl">💬</span>
-                        Gabung Grup WhatsApp
+    <span class="text-xl">💬</span>
+    Gabung Grup WhatsApp
 
-                    </a>
+</a>
 
-                </div>
+</div>
 
 
-                <!-- ================================================== -->
-                <!-- TOMBOL LANJUT                                     -->
-                <!-- ================================================== -->
+<!-- ================================================== -->
+<!-- TOMBOL LANJUT -->
+<!-- ================================================== -->
 
-                <div class="mt-5">
+<div class="mt-5">
 
-                    <button
-                        type="button"
-                        id="nextBtn"
-                        disabled
-                        class="w-full bg-gray-400 text-white font-bold py-3 px-4 rounded-xl cursor-not-allowed flex justify-center items-center gap-2">
+    <button
+        type="button"
+        id="nextBtn"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 flex justify-center items-center gap-2">
 
-                        🔒 Gabung WhatsApp Terlebih Dahulu
+        Selanjutnya
+        <span class="text-xl">→</span>
 
-                    </button>
+    </button>
 
-                    <p
-                        id="nextInfo"
-                        class="text-xs text-center text-gray-400 mt-3">
+    <p
+        id="nextInfo"
+        class="text-xs text-center text-gray-400 mt-3">
 
-                        Setelah bergabung ke grup WhatsApp,
-                        kembali ke halaman ini untuk melanjutkan.
+        Silakan bergabung ke Grup WhatsApp terlebih dahulu,
+        kemudian lanjutkan ke pengisian presensi.
 
-                    </p>
+    </p>
 
-                </div>
-
+</div>
             </div>
 
         </section>
@@ -643,53 +642,37 @@
 
 
         // ======================================================
-        // TOMBOL GABUNG WHATSAPP
-        // ======================================================
+// TOMBOL GABUNG WHATSAPP
+// ======================================================
 
-        whatsappBtn.addEventListener('click', function () {
+whatsappBtn.addEventListener('click', function () {
 
-            whatsappClicked = true;
+    nextInfo.innerHTML =
+        '✅ Grup WhatsApp telah dibuka. Silakan bergabung, kemudian lanjutkan pengisian presensi.';
 
-            // Aktifkan tombol lanjut
-            nextBtn.disabled = false;
+    nextInfo.className =
+        'text-xs text-center text-green-600 mt-3 font-medium';
 
-            nextBtn.className =
-                'w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 flex justify-center items-center gap-2';
-
-            nextBtn.innerHTML =
-                '✅ Saya Sudah Bergabung — Lanjut';
-
-            nextInfo.innerHTML =
-                'Jika sudah bergabung, silakan kembali ke halaman ini dan tekan tombol di atas.';
-
-            nextInfo.className =
-                'text-xs text-center text-green-600 mt-3 font-medium';
-
-        });
-
+});
 
         // ======================================================
-        // TOMBOL LANJUT KE FORM
-        // ======================================================
+// TOMBOL LANJUT KE FORM
+// ======================================================
 
-        nextBtn.addEventListener('click', function () {
+nextBtn.addEventListener('click', function () {
 
-            if (!whatsappClicked) {
-                return;
-            }
+    introSection.classList.add('section-hidden');
 
-            introSection.classList.add('section-hidden');
+    formSection.classList.remove('section-hidden');
 
-            formSection.classList.remove('section-hidden');
+    formSection.classList.add('fade-in');
 
-            formSection.classList.add('fade-in');
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
 
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-
-        });
+});
 
 
         // ======================================================
