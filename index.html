@@ -558,23 +558,18 @@
                 <!-- PESAN BERHASIL -->
                 <div
                     id="successMessage"
-                    class="hidden mt-6 bg-green-50 border border-green-200 rounded-xl p-5 text-center fade-in">
+                    class="hidden mt-5 bg-green-50 border border-green-200 rounded-xl p-5 text-center fade-in">
 
-                    <div class="text-4xl mb-3">✅</div>
+                    <div class="text-4xl mb-2">✅</div>
 
                     <h3 class="text-lg font-bold text-green-800 mb-2">
-                        Presensi Berhasil Terekam
+                        Presensi Berhasil Dikirim
                     </h3>
 
                     <p class="text-sm text-green-700 leading-relaxed">
-                        Data presensi dan refleksi Anda telah berhasil disimpan.
-                        Terima kasih telah mengikuti Webinar Hari Belajar Guru.
-                        Sertifikat akan dikirimkan ke alamat email yang Anda daftarkan
-                        sesuai jadwal yang ditentukan panitia.
-                    </p>
-
-                    <p class="text-xs text-green-600 mt-3 font-medium">
-                        Anda dapat menutup halaman ini.
+                        Data presensi dan refleksi Anda telah dikirim ke sistem.
+                        Sertifikat akan diproses dan dikirim ke alamat email yang
+                        Anda daftarkan sesuai jadwal.
                     </p>
 
                 </div>
@@ -624,9 +619,6 @@
 
         const submitBtn =
             document.getElementById('submitBtn');
-
-        const successMessage =
-            document.getElementById('successMessage');
 
 
         // ======================================================
@@ -749,150 +741,119 @@ nextBtn.addEventListener('click', function () {
 
 
         // ======================================================
-// PENGIRIMAN DATA
-// ======================================================
+        // PENGIRIMAN DATA
+        // ======================================================
 
-form.addEventListener('submit', function (e) {
+        let isSubmitting = false;
 
-    e.preventDefault();
+        form.addEventListener('submit', async function (e) {
 
-    // Verifikasi waktu
-    if (!periksaWaktu()) {
+            e.preventDefault();
 
-        Swal.fire({
-            icon: 'warning',
-            title: 'Waktu Tidak Valid',
-            text: 'Presensi hanya dapat diisi pada 1 Oktober 2026 pukul 14.00 - 23.59 WIB.',
-            confirmButtonColor: '#2563EB'
-        });
+            // Mencegah klik / submit berulang
+            if (isSubmitting) {
+                return;
+            }
 
-        return;
-    }
+            // Verifikasi waktu
+            if (!periksaWaktu()) {
 
-    // --------------------------------------------------
-    // KUNCI TOMBOL SEJAK AWAL
-    // --------------------------------------------------
-    submitBtn.disabled = true;
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Waktu Tidak Valid',
+                    text: 'Presensi hanya dapat diisi pada 1 Oktober 2026 pukul 14.00 - 23.59 WIB.',
+                    confirmButtonColor: '#2563EB'
+                });
 
-    submitBtn.innerHTML = `
-        <svg class="animate-spin h-5 w-5 text-white"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24">
+                return;
+            }
 
-            <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4">
-            </circle>
+            // Kunci proses submit
+            isSubmitting = true;
+            submitBtn.disabled = true;
 
-            <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z">
-            </path>
+            submitBtn.innerHTML =
+                '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">' +
+                '<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>' +
+                '<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>' +
+                '</svg> Mengirim Data...';
 
-        </svg>
+            submitBtn.className =
+                'w-full bg-gray-400 text-white font-bold py-3 px-4 rounded-xl cursor-not-allowed flex justify-center items-center gap-2';
 
-        Mengirim Data...
-    `;
-
-    submitBtn.className =
-        'w-full bg-gray-400 text-white font-bold py-3 px-4 rounded-xl cursor-not-allowed flex justify-center items-center gap-2';
-
-
-    // --------------------------------------------------
-    // MODAL LOADING LANGSUNG MUNCUL
-    // --------------------------------------------------
-    Swal.fire({
-        title: 'Menyimpan Presensi...',
-        text: 'Mohon tunggu sebentar, data Anda sedang direkam.',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showConfirmButton: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-
-
-    // --------------------------------------------------
-    // AMBIL DATA FORM
-    // --------------------------------------------------
-    const formData = new FormData(form);
-
-    const data = Object.fromEntries(
-        formData.entries()
-    );
-
-
-    // --------------------------------------------------
-    // KIRIM KE GOOGLE APPS SCRIPT
-    // --------------------------------------------------
-    fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify(data)
-    })
-
-    .then(response => response.json())
-
-    .then(result => {
-
-        if (result.status === 'success') {
-
-            // --------------------------------------------------
-            // UBAH MODAL LOADING MENJADI BERHASIL
-            // --------------------------------------------------
+            // Modal langsung muncul agar pengguna tahu klik sudah diterima
             Swal.fire({
-                icon: 'success',
-                title: 'Presensi Berhasil!',
-                text: 'Data presensi dan refleksi Anda telah berhasil direkam. Sertifikat akan dikirimkan ke email Anda sesuai jadwal.',
-                confirmButtonText: 'Selesai',
-                confirmButtonColor: '#2563EB',
-                allowOutsideClick: false
+                title: 'Mengirim Presensi...',
+                text: 'Data sedang dikirim ke sistem.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
             });
 
+            // Ambil data form
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
 
-            // Reset form
-            form.reset();
+            try {
 
-        } else {
+                // Kirim ke Google Apps Script tanpa meminta browser membaca response.
+                // Ini menghindari error CORS dari GitHub Pages ke Apps Script.
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(data)
+                });
 
-            throw new Error(result.message);
+                Swal.close();
 
-        }
+                // Reset data form
+                form.reset();
 
-    })
+                // Tampilkan keterangan keberhasilan di halaman
+                const successMessage =
+                    document.getElementById('successMessage');
 
-    .catch(error => {
+                successMessage.classList.remove('hidden');
 
-        // --------------------------------------------------
-        // BILA GAGAL
-        // --------------------------------------------------
-        Swal.fire({
-            icon: 'error',
-            title: 'Data Belum Terkirim',
-            text: 'Terjadi kesalahan saat menyimpan data. Silakan coba kembali.',
-            footer: `<small>${error.message}</small>`,
-            confirmButtonColor: '#DC2626',
-            allowOutsideClick: false
+                successMessage.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+
+                // Tombol dikunci permanen setelah pengiriman
+                submitBtn.innerHTML = '✅ Presensi Sudah Terkirim';
+                submitBtn.disabled = true;
+                submitBtn.className =
+                    'w-full bg-green-600 text-white font-bold py-3 px-4 rounded-xl cursor-default flex justify-center items-center gap-2';
+
+            } catch (error) {
+
+                Swal.close();
+
+                isSubmitting = false;
+
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Kirim Presensi & Refleksi';
+                submitBtn.className =
+                    'w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 flex justify-center items-center gap-2';
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Pengiriman Gagal',
+                    text: 'Data belum berhasil dikirim. Silakan coba kembali.',
+                    footer: '<small>' + error.message + '</small>',
+                    confirmButtonColor: '#DC2626'
+                });
+
+            } finally {
+                periksaWaktu();
+            }
+
         });
 
-        // Tombol boleh digunakan kembali
-        submitBtn.disabled = false;
-
-    })
-
-    .finally(() => {
-
-        periksaWaktu();
-
-    });
-
-});
     </script>
 
 </body>
